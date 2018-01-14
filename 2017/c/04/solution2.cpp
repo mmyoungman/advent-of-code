@@ -14,41 +14,25 @@ int main() {
    fread(buffer, fsize, 1, fp); 
    fclose(fp);
 
-   //printf("%s\n", buffer);
-
    int numpassphrases;
    char **passphrases = str_split(buffer, '\n', &numpassphrases);
    int numvalidphrases = 0;
 
    for(int i = 0; i < numpassphrases; i++) {
-      if(str_len(passphrases[i]) < 1) continue;
+      if(str_len(passphrases[i]) < 1) continue; // because of the empty line at the end of input file
 
       int numwords;
       char **words = str_split(passphrases[i], ' ', &numwords);
 
       for(int j = 0; j < numwords; j++) {
-         for(int k = 0; k < str_len(words[j]); k++) {
-            for(int l = 0; l < str_len(words[j]); l++) {
-               if(l == k) continue;
-               else {
-                  if(words[j][k] > words[j][l]) {
-                     char temp = words[j][k];
-                     words[j][k] = words[j][l];
-                     words[j][l] = temp;
-                  }
-               }
-            }
-         }
+         str_sort(words[j]);
       }
 
       int valid = 1;
       for(int j = 0; j < numwords; j++) {
-         for(int k = 0; k < numwords; k++) {
-            if(j == k) continue;
-            else {
-               if(str_equal(words[j], words[k])) {
-                  valid = 0;
-               }
+         for(int k = j+1; k < numwords; k++) {
+            if (str_equal(words[j], words[k])) {
+               valid = 0;
             }
          }
       }
@@ -57,6 +41,6 @@ int main() {
       }
    }
 
-   printf("Part One: %d\n", numvalidphrases);
+   printf("Part Two: %d\n", numvalidphrases);
    return 0;
 }

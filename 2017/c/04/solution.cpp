@@ -27,12 +27,9 @@ int main() {
       char **words = str_split(passphrases[i], ' ', &numwords);
       int valid = 1;
       for(int j = 0; j < numwords; j++) {
-         for(int k = 0; k < numwords; k++) {
-            if(j == k) continue;
-            else {
-               if(str_equal(words[j], words[k])) {
-                  valid = 0;
-               }
+         for (int k = j + 1; k < numwords; k++) {
+            if (str_equal(words[j], words[k])) {
+               valid = 0;
             }
          }
       }
