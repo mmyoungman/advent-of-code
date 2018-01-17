@@ -1,3 +1,4 @@
+#include <stdio.h>
 /*
    lib-mmy.h
    Last change: 17 Jan 2018
@@ -359,8 +360,10 @@ int str_endswith(char *str, char *end) {
 }
 
 void str_concat(char *str, char *addition) {
-   int newLength = str_len(str) + str_len(addition) + 1;
-   str = (char *)realloc(str, sizeof(char) * newLength);
+   // We're going to presume that the user has already realloced str
+   // int newLength = str_len(str) + str_len(addition) + 1;
+   // printf("%d %s %s\n", newLength, str, addition);
+   // str = (char *)realloc(str, sizeof(char) * newLength);
    char *strPtr = str;
    while (*strPtr != '\0') {
       strPtr++;
