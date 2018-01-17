@@ -10,12 +10,12 @@
    (a) unsigned long stb_srand(unsigned long seed)
    (b) unsigned long stb_rand()
    (c) double stb_frand()
-   Copied from https://github.com/nothings/stb/ (public domain). 
-   Uses Meresenne Twister and LCG to seed. Changed so automatically 
+   Copied from https://github.com/nothings/stb/ (public domain).
+   Uses Meresenne Twister and LCG to seed. Changed so automatically
    seeded with time(NULL) if srand() hasn't been called.
-   (a) seeds the random number generator. 
-   (b) returns a random number between 0 and ULONG_MAX. 
-   (c) returns a random number between 0 and 1. 
+   (a) seeds the random number generator.
+   (b) returns a random number between 0 and ULONG_MAX.
+   (c) returns a random number between 0 and 1.
 
    002. Math operations
    (a) float mathSqrt(float input)
@@ -24,7 +24,7 @@
    (d) int mathMax(int a, int b)
    (e) int mathAbs(int a)
    (f) int mathPower(int num, int pow)
-   a,b use intrinsics. c,d,e: 
+   a,b use intrinsics. c,d,e:
    https://graphics.stanford.edu/%7Eseander/bithacks.html
 
    003. ANSI string operations
@@ -52,7 +52,7 @@
 
 */
 
-// 000. START 
+// 000. START
 #if 0
 
 #include <stdint.h>
@@ -71,11 +71,14 @@ typedef float f32;
 typedef double f64;
 
 #define Kilobytes(Value) ((Value)*1024)
-#define Megabytes(Value) (Kilobytes(Value)*1024)
-#define Gigabytes(Value) (Megabytes(Value)*1024)
+#define Megabytes(Value) (Kilobytes(Value) * 1024)
+#define Gigabytes(Value) (Megabytes(Value) * 1024)
 
 #if DEBUG
-#define assert(expression) if(!(expression)) { *(int*)0 = 0; }
+#define assert(expression)                                                     \
+   if (!(expression)) {                                                        \
+      *(int *)0 = 0;                                                           \
+   }
 #else
 #define assert(expression)
 #endif
@@ -86,9 +89,9 @@ typedef double f64;
 // 001. START
 #if 0
 
-#include <time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 typedef struct { char d[4]; } stb__4;
 typedef struct { char d[8]; } stb__8;
@@ -165,7 +168,7 @@ void stb_reverse(void *p, size_t n, size_t sz) {
 }
 
 // NOTE(stb): public domain Mersenne Twister by Michael Brundage
-#define STB__MT_LEN       624
+#define STB__MT_LEN 624
 
 int stb__mt_index = STB__MT_LEN*sizeof(unsigned long)+1;
 unsigned long stb__mt_buffer[STB__MT_LEN];
@@ -183,13 +186,14 @@ void stb_srand(unsigned long seed) {
     stb__mt_index = STB__MT_LEN*sizeof(unsigned long);
 }
 
-#define STB__MT_IA           397
-#define STB__MT_IB           (STB__MT_LEN - STB__MT_IA)
-#define STB__UPPER_MASK      0x80000000
-#define STB__LOWER_MASK      0x7FFFFFFF
-#define STB__MATRIX_A        0x9908B0DF
-#define STB__TWIST(b,i,j)    ((b)[i] & STB__UPPER_MASK) | ((b)[j] & STB__LOWER_MASK)
-#define STB__MAGIC(s)        (((s)&1)*STB__MATRIX_A)
+#define STB__MT_IA 397
+#define STB__MT_IB (STB__MT_LEN - STB__MT_IA)
+#define STB__UPPER_MASK 0x80000000
+#define STB__LOWER_MASK 0x7FFFFFFF
+#define STB__MATRIX_A 0x9908B0DF
+#define STB__TWIST(b, i, j)                                                    \
+   ((b)[i] & STB__UPPER_MASK) | ((b)[j] & STB__LOWER_MASK)
+#define STB__MAGIC(s) (((s)&1) * STB__MATRIX_A)
 
 unsigned long stb_rand() {
     if(!srandcalled) {
@@ -298,96 +302,102 @@ int mathPower(int num, int pow) {
 #include <stdlib.h>
 
 int str_len(char *str) {
-     char* ptr = str;
-     while(*ptr != 0)
-          ptr++;
-     return ptr - str;
+   char *ptr = str;
+   while (*ptr != 0)
+      ptr++;
+   return ptr - str;
 }
 
 void str_copy(char *s, char *copy) {
-     while(*s != '\0') {
-          *copy = *s;
-          s++, copy++;
-     }
-     *copy = '\0';
+   while (*s != '\0') {
+      *copy = *s;
+      s++, copy++;
+   }
+   *copy = '\0';
 }
 
-char* str_copy(char *s) {
-  char* copy = (char*)malloc(sizeof(char)*(str_len(s)+1));
-  char* sPtr = s;
-  char* copyPtr = copy;
-  while(*sPtr != '\0') {
-    *copyPtr = *sPtr;
-    sPtr++, copyPtr++;
-  }
-  *copyPtr = '\0';
-  return copy;
+char *str_copy(char *s) {
+   char *copy = (char *)malloc(sizeof(char) * (str_len(s) + 1));
+   char *sPtr = s;
+   char *copyPtr = copy;
+   while (*sPtr != '\0') {
+      *copyPtr = *sPtr;
+      sPtr++, copyPtr++;
+   }
+   *copyPtr = '\0';
+   return copy;
 }
 
 int str_equal(char *a, char *b) {
-  while((*a != '\0') && (*a == *b)) {
-    a++, b++;
-  }
-  return ((*a == '\0') && (*b == '\0'));
+   while ((*a != '\0') && (*a == *b)) {
+      a++, b++;
+   }
+   return ((*a == '\0') && (*b == '\0'));
 }
 
-int str_beginswith(char* a, char *str) {
-  while((*a != '\0') && (*a == *str))
-    a++, str++;
-  return *a == '\0';
+int str_beginswith(char *a, char *str) {
+   while ((*a != '\0') && (*a == *str))
+      a++, str++;
+   return *a == '\0';
 }
 
-int str_endswith(char* str, char* end) {
-    char* strPtr = str;
-    int endLength = str_len(end);
-    while(*end != '\0') { end++; }
-    while(*strPtr != '\0') { strPtr++; }
+int str_endswith(char *str, char *end) {
+   char *strPtr = str;
+   int endLength = str_len(end);
+   while (*end != '\0') {
+      end++;
+   }
+   while (*strPtr != '\0') {
+      strPtr++;
+   }
 
-    while(*strPtr == *end && endLength > 0) {
-        strPtr--, end--;
-        endLength--;
-    }
-    return *strPtr == *end;
+   while (*strPtr == *end && endLength > 0) {
+      strPtr--, end--;
+      endLength--;
+   }
+   return *strPtr == *end;
 }
 
-void str_concat(char* str, char* addition) {
-    int newLength = str_len(str) + str_len(addition) + 1;
-    str = (char*)realloc(str, sizeof(char) * newLength);
-    char* strPtr = str;
-    while(*strPtr != '\0') { strPtr++; }
-    char* addPtr = addition;
-    while(*addPtr != '\0') {
-        *strPtr = *addPtr;
-        strPtr++, addPtr++;
-    }
-    *strPtr = '\0';
+void str_concat(char *str, char *addition) {
+   int newLength = str_len(str) + str_len(addition) + 1;
+   str = (char *)realloc(str, sizeof(char) * newLength);
+   char *strPtr = str;
+   while (*strPtr != '\0') {
+      strPtr++;
+   }
+   char *addPtr = addition;
+   while (*addPtr != '\0') {
+      *strPtr = *addPtr;
+      strPtr++, addPtr++;
+   }
+   *strPtr = '\0';
 }
 
-void str_lower(char* str) {
-  char* strPtr = str;
-  while(*strPtr != '\0') {
-    if(*strPtr >= 'A' && *strPtr <= 'Z') {
-      *strPtr += 'a' - 'A';
-    }
-    strPtr++;
-  }
+void str_lower(char *str) {
+   char *strPtr = str;
+   while (*strPtr != '\0') {
+      if (*strPtr >= 'A' && *strPtr <= 'Z') {
+         *strPtr += 'a' - 'A';
+      }
+      strPtr++;
+   }
 }
 
-void str_upper(char* str) {
-  char* strPtr = str;
-  while(*strPtr != '\0') {
-    if(*strPtr >= 'a' && *strPtr <= 'z') {
-      *strPtr -= 'a' - 'A';
-    }
-    strPtr++;
-  }
+void str_upper(char *str) {
+   char *strPtr = str;
+   while (*strPtr != '\0') {
+      if (*strPtr >= 'a' && *strPtr <= 'z') {
+         *strPtr -= 'a' - 'A';
+      }
+      strPtr++;
+   }
 }
 
-void str_sort(char* str) {
+void str_sort(char *str) {
    int len = str_len(str);
-   for(int i = 0; i < len; i++) {
-      for(int j = i+1; j < len; j++) {
-         if(str[i] > str[j]) {
+   for (int i = 0; i < len; i++) {
+      for (int j = i + 1; j < len; j++) {
+         if (str[i] > str[j]) {
             char temp = str[i];
             str[i] = str[j];
             str[j] = temp;
@@ -396,91 +406,91 @@ void str_sort(char* str) {
    }
 }
 
-char** str_split(char* str, char c, int* size) {
-  int numStrs = 1;
-  char* strPtr = str;
-  while(*strPtr != '\0') {
-    if(*strPtr == c) {
-      *strPtr = '\0';
-      numStrs++;
-    }
-    strPtr++;
-  }
-  char** result = (char**)malloc(sizeof(char*)*numStrs);
-  char* strStart = str;
-  strPtr = strStart;
-  int i = 0;
-  while(numStrs > 0) {
-    if(*strPtr == '\0') {
-      numStrs--;
-      result[i] = strStart;
-      strStart = strPtr + 1;
-      i++;
-    }
-    strPtr++;
-  }
-  *size = i;
-  return result;
+char **str_split(char *str, char c, int *size) {
+   int numStrs = 1;
+   char *strPtr = str;
+   while (*strPtr != '\0') {
+      if (*strPtr == c) {
+         *strPtr = '\0';
+         numStrs++;
+      }
+      strPtr++;
+   }
+   char **result = (char **)malloc(sizeof(char *) * numStrs);
+   char *strStart = str;
+   strPtr = strStart;
+   int i = 0;
+   while (numStrs > 0) {
+      if (*strPtr == '\0') {
+         numStrs--;
+         result[i] = strStart;
+         strStart = strPtr + 1;
+         i++;
+      }
+      strPtr++;
+   }
+   *size = i;
+   return result;
 }
 
-int str_toint(char* str) {
+int str_toint(char *str) {
    int result = 0;
-   char* strPtr = str;
+   char *strPtr = str;
 
    int length = str_len(str);
 
-   while(length > 0) {
+   while (length > 0) {
       length--;
-      if(*strPtr < '0' || *strPtr > '9') {
+      if (*strPtr < '0' || *strPtr > '9') {
          strPtr++;
          continue;
-      }
-      else {
+      } else {
          // Calculate value based on position (i.e. value * 10^position)
          int exponent = 1;
-         for (int i = 0; i < length; i++)
-         {
+         for (int i = 0; i < length; i++) {
             exponent *= 10;
          }
          result += (*strPtr - 48) * exponent;
          strPtr++;
       }
    }
-  if(str[0] == '-') result = -result;
+   if (str[0] == '-')
+      result = -result;
 
-  return result;
+   return result;
 }
 
-char* str_inttostr(int num) {
+char *str_inttostr(int num) {
    int negative = 0;
-   if(num < 0) {
+   if (num < 0) {
       negative = 1;
       num = -num;
    }
 
    int len = 1;
    int temp = num;
-   while(temp >= 10) {
+   while (temp >= 10) {
       len++;
       temp /= 10;
    }
 
-   char* res = (char*) malloc(sizeof(char) * (len + negative + 1)); // extra for '-' and '\0'
+   char *res = (char *)malloc(sizeof(char) *
+                              (len + negative + 1)); // extra for '-' and '\0'
 
-   char* resPtr = res;
-   if(negative) {
+   char *resPtr = res;
+   if (negative) {
       *resPtr = '-';
       resPtr++;
    }
 
-   while(len > 0) {
+   while (len > 0) {
       int mod = 1;
       int templen = len;
-      while(templen > 0) {
+      while (templen > 0) {
          mod *= 10;
          templen--;
       }
-      *resPtr = '0' + ((num % mod) / (mod/10));
+      *resPtr = '0' + ((num % mod) / (mod / 10)); // isolate wanted digit
       resPtr++;
       len--;
    }
@@ -512,9 +522,10 @@ void arr_init(arr *a) {
 int arr_append(arr *a, void *ptr) {
    if(a->size + 1 >= a->capacity) {
       a->capacity *= 2;
-      a->data = (void*) realloc(a->data, sizeof(void) * a->capacity); 
+      a->data = (void*) realloc(a->data, sizeof(void*) * a->capacity); 
    }
-   a->data[a->size] = (void*) ptr;
+   void *slot = a->data[a->size]; 
+   *slot = ptr;
    a->size++;
 }
 
