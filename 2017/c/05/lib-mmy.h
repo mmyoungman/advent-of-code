@@ -417,14 +417,9 @@ int str_toint(char* str) {
 
    int length = str_len(str);
 
-   int negative = 0;
-   if(*strPtr == '-') {
-      negative = 1;
-   }
-
    while(length > 0) {
       length--;
-      if(*strPtr < 48 || *strPtr > 57) {
+      if(*strPtr < '0' || *strPtr > '9') {
          strPtr++;
          continue;
       }
@@ -439,7 +434,7 @@ int str_toint(char* str) {
          strPtr++;
       }
    }
-  if(negative) result = -result;
+  if(str[0] == '-') result = -result;
 
   return result;
 }

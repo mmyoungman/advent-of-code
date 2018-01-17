@@ -5,7 +5,7 @@ g++ $flags solution.cpp -o solution
 
 ./solution
 
-#g++ $flags solution2.cpp -o solution2 
+g++ $flags solution2.cpp -o solution2 
 
-#./solution2
+./solution2
 
