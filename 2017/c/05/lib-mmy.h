@@ -418,9 +418,8 @@ int str_toint(char* str) {
    int length = str_len(str);
 
    int negative = 0;
-   if(str[length-1] == '-') {
+   if(*strPtr == '-') {
       negative = 1;
-      length--;
    }
 
    while(length > 0) {
@@ -429,16 +428,18 @@ int str_toint(char* str) {
          strPtr++;
          continue;
       }
-
-      // Calculate value based on position (i.e. value * 10^position)
-      int exponent = 1;
-      for(int i = 0; i < length; i++) {
-          exponent *= 10;
+      else {
+         // Calculate value based on position (i.e. value * 10^position)
+         int exponent = 1;
+         for (int i = 0; i < length; i++)
+         {
+            exponent *= 10;
+         }
+         result += (*strPtr - 48) * exponent;
+         strPtr++;
       }
-      result += (*strPtr - 48) * exponent;
-      strPtr++;
    }
-//   if(negative) result = -result;
+  if(negative) result = -result;
 
   return result;
 }
