@@ -58,16 +58,10 @@ int main() {
    *blockstate = '\0';
    for (int i = 0; i < numblocks; i++) {
       intblocks[i] = str_toint(blocks[i]);
-      // blockstate =
-      //      (char *)realloc(blockstate, sizeof(char) * (str_len(blockstate) +
-      //                                                  str_len(blocks[i]) +
-      //                                                  1));
       if (i != 0)
          str_concat(blockstate, ",");
       str_concat(blockstate, blocks[i]);
    }
-
-   // printf("%s\n", blockstate);
 
    arr *a = (arr*) malloc(sizeof(arr));
    arr_init(a);
@@ -96,22 +90,12 @@ int main() {
       *blockstate = '\0';
       for (int i = 0; i < numblocks; i++) {
          char *addition = str_inttostr(intblocks[i]);
-         // printf("blockstate: %s\naddition: %s\n", blockstate, addition);
-         // printf("blockstate len: %d\naddition len: %d\n", str_len(blockstate), str_len(addition));
-         // printf("total len: %d\n\n", (sizeof(char) * (str_len(blockstate) + str_len(addition) + 1)));
-         // blockstate = (char *)realloc(
-         //     blockstate,
-         //     sizeof(char) * (str_len(blockstate) +
-         //                     str_len(addition) + 1));
          if (i != 0) {
             str_concat(blockstate, ",");
          }
-         // printf("%s\n", blockstate);
          char *newaddition = str_inttostr(intblocks[i]);
-         // printf("%s %s\n", blockstate, newaddition);
          str_concat(blockstate, newaddition);
       }
-      // printf("%s\n", blockstate);
    }
 
    printf("Part One: %d\n", cycles);

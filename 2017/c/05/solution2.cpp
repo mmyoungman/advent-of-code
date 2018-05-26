@@ -35,6 +35,6 @@ int main() {
       numsteps++;
    }
 
-   printf("Part One: %d\n", numsteps);
+   printf("Part Two: %d\n", numsteps);
    return 0;
 }
