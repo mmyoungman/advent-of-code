@@ -8,6 +8,9 @@
       (c) Assert/Debug macros
       (d) Logging macros
 
+   001.
+      (a) void memset(unsigned char *ptr, unsigned char value, u64 size)
+
    002. 
    Copied from https://github.com/nothings/stb/ (public domain). 
    Uses Meresenne Twister and LCG to seed. Changed so automatically 
@@ -86,7 +89,6 @@ typedef double f64;
 #define assert(expr)
 #endif
 
-
 #define log_err(msg, ...) fprintf(stderr, "[ERROR] (%s:%d) " msg "\n", \
                                   __FILE__, __LINE__, ##__VA_ARGS__) 
 #define log_warn(msg, ...) fprintf(stderr, "[WARN] (%s:%d) " msg "\n", \
@@ -98,7 +100,14 @@ typedef double f64;
 // 000. END
 
 // 001. START
-#if 0
+#if 1
+// NOTE: Untested
+void memset(unsigned char *ptr, unsigned char value, u64 size) {
+   for(u64 i = 0; i < size; i++) {
+      *ptr = value;
+      ptr++;
+   }
+}
 #endif
 // 001. END
 
@@ -330,13 +339,13 @@ int str_equal(char *a, char *b) {
   return ((*a == '\0') && (*b == '\0'));
 }
 
-//void str_copy(char *s, char *copy) {
-//     while(*s != '\0') {
-//          *copy = *s;
-//          s++, copy++;
-//     }
-//     *copy = '\0';
-//}
+void str_copy(char *s, char *copy) {
+    while(*s != '\0') {
+         *copy = *s;
+         s++, copy++;
+    }
+    *copy = '\0';
+}
 
 char* str_copy(char *s) {
   char* copy = (char*)alloc(sizeof(char)*(str_len(s)+1));
