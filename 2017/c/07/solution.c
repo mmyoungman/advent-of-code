@@ -8,6 +8,22 @@ typedef struct pipe {
    char** children;
 } pipe;
 
+int getValue(int i, pipe* pipes) {
+   if(arr_len(pipes[i].children) == 0) return pipes[i].weight;
+   else {
+      int result = pipes[i].weight;
+      for(int j = 0; j < arr_len(pipes[i].children); j++) {
+         for(int k = 0; k < arr_len(pipes); k++) {
+            if(str_equal(pipes[i].children[j], pipes[k].name)) {
+               result += getValue(k, pipes);
+               break;
+            }
+         }
+      }
+      return result;
+   }
+}
+
 int main() {
    FILE* fp = fopen("input", "r");
 
@@ -33,11 +49,10 @@ int main() {
 
       p->name = str_copy(pipeDetails[0]);
 
-      char* weightStr = str_lstrip(pipeDetails[1], '(');
-      str_rstrip(weightStr, ')');
+      char* weightStr = str_strip(pipeDetails[1], "()");
       p->weight = str_toint(weightStr);
 
-      int numChildren = (numDetails == 2) ? 0 : numDetails - 3;
+      int numChildren = (numDetails <= 2) ? 0 : numDetails - 3;
       for(int j = 0; j < numChildren; j++) {
          arr_push(p->children, str_rstrip(pipeDetails[3 + j], ','));
       }
@@ -61,4 +76,28 @@ int main() {
    }
 
    log_info("Solution Part One: %s", pipes[index].name);
+
+   // With this info you can work out which pipe needs to be changed and to what...
+   for(int i = 0; i < arr_len(pipes); i++) {
+      if(arr_len(pipes[i].children) <= 0) continue;
+      else {
+         int* weights = 0;
+         for(int j = 0; j < arr_len(pipes[i].children); j++) {
+            for(int k = 0; k < arr_len(pipes); k++) {
+               if(str_equal(pipes[i].children[j], pipes[k].name)) {
+                  arr_push(weights, getValue(k, pipes));
+               }
+            }
+         }
+         for(int j = 0; j < arr_len(weights); j++) {
+            if(weights[0] != weights[j]) {
+               for(int k = 0; k < arr_len(weights); k++) {
+                  printf("%s %d, ", pipes[i].children[k], weights[k]);
+               }
+               printf("\n");
+               //dbg("Pipe name: %s, Weight: %d", pipes[i].children[j], weights[j]);
+            }
+         }
+      }
+   }
 }
