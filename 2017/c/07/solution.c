@@ -24,6 +24,12 @@ int getValue(int i, pipe* pipes) {
    }
 }
 
+int getValueFromName(char* name, pipe* pipes) {
+   for(int i = 0; i < arr_len(pipes); i++) {
+      if(str_equal(pipes[i].name, name)) return getValue(i, pipes);
+   }
+}
+
 int main() {
    FILE* fp = fopen("input", "r");
 
@@ -75,29 +81,72 @@ int main() {
       end: ;
    }
 
-   log_info("Solution Part One: %s", pipes[index].name);
+   log_info("Solution Part One: %d, %s", index, pipes[index].name);
 
    // With this info you can work out which pipe needs to be changed and to what...
-   for(int i = 0; i < arr_len(pipes); i++) {
-      if(arr_len(pipes[i].children) <= 0) continue;
-      else {
+   while(1) {
+      if(arr_len(pipes[index].children) == 0) {
+         log_info("solution Part Two: %d, %s", index, pipes[index].name);
+         return 0;
+      }
+      else if(arr_len(pipes[index].children) == 1) {
+         for(int i = 0; i < arr_len(pipes); i++) {
+            if(str_equal(pipes[i].name, pipes[index].children[0])) {
+               index = i;
+               continue;
+            }
+         }
+      }
+
+      // if all children have the same weight, return current index
+      int value = getValueFromName(pipes[index].children[0], pipes);
+      for(int i = 1; i < arr_len(pipes[index].children); i++) {
+         if(value != getValueFromName(pipes[index].children[i], pipes)) {
+            break;
+         }
+         if(i == arr_len(pipes[index].children) - 1) {
+            log_info("Solution Part Two: %d, %s", index, pipes[index].name); 
+            return 0;
+         }
+      }
+
+      if(arr_len(pipes[index].children) == 2) {
+         dbg("NO! I REFUSE TO WORK OUT WHICH ONE IS THE ODD ONE OUT!");
+         dbg("Refusal to work with pipe: %d, %s", index, pipes[index].name);
+         return 1;
+      } else { // no of children > 2
+         // Get the weights of the children
          int* weights = 0;
-         for(int j = 0; j < arr_len(pipes[i].children); j++) {
-            for(int k = 0; k < arr_len(pipes); k++) {
-               if(str_equal(pipes[i].children[j], pipes[k].name)) {
-                  arr_push(weights, getValue(k, pipes));
+         for(int i = 0; i < arr_len(pipes[index].children); i++) {
+            for(int j = 0; j < arr_len(pipes); j++) {
+               if(str_equal(pipes[index].children[i], pipes[j].name)) {
+                  arr_push(weights, getValue(j, pipes));
+                  break;
                }
             }
          }
-         for(int j = 0; j < arr_len(weights); j++) {
-            if(weights[0] != weights[j]) {
-               for(int k = 0; k < arr_len(weights); k++) {
-                  printf("%s %d, ", pipes[i].children[k], weights[k]);
+         // Find the odd one out
+         int oddOne = 0;
+         while(1) {
+            for(int i = 0; i < arr_len(pipes[index].children); i++) {
+               if(i != oddOne && weights[oddOne] == weights[i]) {
+                  oddOne++;
+                  continue;
                }
-               printf("\n");
-               //dbg("Pipe name: %s, Weight: %d", pipes[i].children[j], weights[j]);
+            }
+            if(oddOne < arr_len(pipes[index].children)) {
+               for(int i = 0; i < arr_len(pipes); i++) {
+                  if(str_equal(pipes[index].children[oddOne], pipes[i].name)) {
+                     index = i;
+                     goto end2;
+                  }
+               }
+            } else {
+               log_info("(Part) Solution Part Two: %d, %s", index, pipes[index].name);
+               return 0;
             }
          }
+         end2: ;
       }
    }
 }
