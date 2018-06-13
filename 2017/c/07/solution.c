@@ -20,7 +20,7 @@ int main() {
    char pipeNames[numPipes][16];
    int pipeWeights[numPipes];
    int pipeChldNum[numPipes];
-   char** pipeChildren[numPipes];
+   char** pipeChildren[numPipes]; // I'm assuming this memory is initialised to zero
 
    for(int i = 0; i < numPipes; i++) {
       int numDetails; 
@@ -36,10 +36,8 @@ int main() {
       if(numDetails == 2) { pipeChldNum[i] = 0; }
       else { pipeChldNum[i] = numDetails - 3; }
 
-      pipeChildren[i] = (char **)malloc(sizeof(char *) * pipeChldNum[i]);
       for(int j = 0; j < pipeChldNum[i]; j++) {
-         pipeChildren[i][j] = (char*)malloc(sizeof(char) * 16);
-         str_copy(str_rstrip(pipeDetails[3 + j], ','), pipeChildren[i][j]);
+         arr_push(pipeChildren[i], str_rstrip(pipeDetails[3 + j], ','));
       }
    }
 
@@ -48,7 +46,7 @@ int main() {
    while(index != newIndex) {
       index = newIndex;
       for(int i = 0; i < numPipes; i++) {
-         for(int j = 0; j < pipeChldNum[i]; j++) {
+         for(int j = 0; j < arr_len(pipeChildren[i]); j++) {
             if(str_equal(pipeNames[index], pipeChildren[i][j])) {
                newIndex = i;
                goto end;
@@ -58,5 +56,5 @@ int main() {
       end: ;
    }
 
-   dbg("Solution Part One: %d, %s", index, pipeNames[index]);
+   log_info("Solution Part One: %s", pipeNames[index]);
 }

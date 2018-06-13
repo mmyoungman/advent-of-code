@@ -1,6 +1,5 @@
 /*
    lib-mmy.h
-   Last change: 26 May 2018
 
    000. 
       (a) Typedefs
@@ -9,7 +8,10 @@
       (d) Logging macros
 
    001.
-      (a) void memset(unsigned char *ptr, unsigned char value, u64 size)
+      (a) void xmemset(unsigned char *ptr, unsigned char value, u64 size)
+      (b) void xmemcpy(unsigned char *dst, unsigned char *src, u64 size)
+      (c) void* xmalloc(size_t num_bytes)
+      (d) void* xrealloc(void *ptr, size_t num_bytes)
 
    002. 
    Copied from https://github.com/nothings/stb/ (public domain). 
@@ -35,12 +37,12 @@
    004. 
    ANSI string operations.
       (a) int str_len(char* str)
-      (b) int str_equal(char *a, char *b)
-      (c) void str_copy(char *s, char *copy)
+      (b) int str_equal(char* a, char* b)
+      (c) void str_copy(char* s, char* copy)
       (d) char* str_copy(char *s)
-      (e) int str_beginswith(char *str, char *start)
-      (f) int str_endswith(char *str, char *end)
-      (g) char* str_concat(char *str, char *addition)
+      (e) int str_beginswith(char* str, char* start)
+      (f) int str_endswith(char* str, char* end)
+      (g) char* str_concat(char* str, char* addition)
       (h) void str_lower(char* str)
       (i) void str_upper(char* str)
       (j) int str_isalpha(char* str)
@@ -51,6 +53,10 @@
       (o) char** str_split(char* str, char c, int* size)
       (p) int str_toint(char* str)
       (q) char* str_inttostr(int num)
+
+   005.
+   Dynamic array. 
+   Copied from https://github.com/pervognsen/bitwise/blob/master/ion/common.c (public domain)
 
 */
 
@@ -84,7 +90,7 @@ typedef double f64;
 #define dbg(msg, ...) fprintf(stderr, "[DEBUG] (%s:%d) " msg "\n", \
                               __FILE__, __LINE__, ##__VA_ARGS__)
 #define assert(expr) if(!(expr)) { dbg("Assert failed: " #expr); *(int*)0 = 0; }
-#else
+#else 
 #define dbg(msg, ...)
 #define assert(expr)
 #endif
@@ -101,98 +107,122 @@ typedef double f64;
 
 // 001. START
 #if 1
-// NOTE: Untested
-void memset(unsigned char *ptr, unsigned char value, u64 size) {
+void xmemset(unsigned char *ptr, unsigned char value, u64 size) {
    for(u64 i = 0; i < size; i++) {
       *ptr = value;
       ptr++;
    }
+}
+
+void xmemcpy(unsigned char *dst, unsigned char *src, u64 size) {
+   while(size > 0) {
+      *dst = *src;
+      src++, dst++;
+      size--;
+   }
+}
+
+#include <stdlib.h>
+void *xmalloc(size_t num_bytes) {
+    void *ptr = malloc(num_bytes);
+    if (!ptr) {
+        perror("xmalloc failed");
+        exit(1);
+    }
+    return ptr;
+}
+
+void *xrealloc(void *ptr, size_t num_bytes) {
+    ptr = realloc(ptr, num_bytes);
+    if (!ptr) {
+        perror("xrealloc failed");
+        exit(1);
+    }
+    return ptr;
 }
 #endif
 // 001. END
 
 // 002. START
 #if 1
-
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
+#include <time.h> // for time()
+#include <limits.h> // for ULONG_MAX
 
 typedef struct { char d[4]; } stb__4;
 typedef struct { char d[8]; } stb__8;
 
-void stb_swap(void *p, void *q, size_t sz) {
-    char buffer[256];
-    if (p == q) return;
-    if (sz == 4) {
-        stb__4 temp    = * ( stb__4 *) p;
-        * (stb__4 *) p = * ( stb__4 *) q;
-        * (stb__4 *) q = temp;
-        return;
-    } else if (sz == 8) {
-        stb__8 temp    = * ( stb__8 *) p;
-        * (stb__8 *) p = * ( stb__8 *) q;
-        * (stb__8 *) q = temp;
-        return;
-    }
+// optimize the small cases, though you shouldn't be calling this for those!
+void stb_swap(void *p, void *q, size_t sz)
+{
+   char buffer[256];
+   if (p == q) return;
+   if (sz == 4) {
+      stb__4 temp    = * ( stb__4 *) p;
+      * (stb__4 *) p = * ( stb__4 *) q;
+      * (stb__4 *) q = temp;
+      return;
+   } else if (sz == 8) {
+      stb__8 temp    = * ( stb__8 *) p;
+      * (stb__8 *) p = * ( stb__8 *) q;
+      * (stb__8 *) q = temp;
+      return;
+   }
 
-    while (sz > sizeof(buffer)) {
-        stb_swap(p, q, sizeof(buffer));
-        p = (char *) p + sizeof(buffer);
-        q = (char *) q + sizeof(buffer);
-        sz -= sizeof(buffer);
-    }
+   while (sz > sizeof(buffer)) {
+      stb_swap(p, q, sizeof(buffer));
+      p = (char *) p + sizeof(buffer);
+      q = (char *) q + sizeof(buffer);
+      sz -= sizeof(buffer);
+   }
 
-    memcpy(buffer, p     , sz);
-    memcpy(p     , q     , sz);
-    memcpy(q     , buffer, sz);
+   xmemcpy(buffer, p     , sz);
+   xmemcpy(p     , q     , sz);
+   xmemcpy(q     , buffer, sz);
 }
 
 static unsigned long stb__rand_seed=0;
 
-unsigned long stb_srandLCG(unsigned long seed) {
-    unsigned long previous = stb__rand_seed;
-    stb__rand_seed = seed;
-    return previous;
+unsigned long stb_srandLCG(unsigned long seed)
+{
+   unsigned long previous = stb__rand_seed;
+   stb__rand_seed = seed;
+   return previous;
 }
 
-unsigned long stb_randLCG(void) {
-    stb__rand_seed = stb__rand_seed * 2147001325 + 715136305; // NOTE(stb): BCPL generator
-    // shuffle non-random bits to the middle, and xor to decorrelate with seed
-    return 0x31415926 ^ ((stb__rand_seed >> 16) + (stb__rand_seed << 16));
+unsigned long stb_randLCG(void)
+{
+   stb__rand_seed = stb__rand_seed * 2147001325 + 715136305; // BCPL generator
+   // shuffle non-random bits to the middle, and xor to decorrelate with seed
+   return 0x31415926 ^ ((stb__rand_seed >> 16) + (stb__rand_seed << 16));
 }
 
-double stb_frandLCG(void) {
-    return stb_randLCG() / ((double) (1 << 16) * (1 << 16));
+void stb_shuffle(void *p, size_t n, size_t sz, unsigned long seed)
+{
+   char *a;
+   unsigned long old_seed;
+   int i;
+   if (seed)
+      old_seed = stb_srandLCG(seed);
+   a = (char *) p + (n-1) * sz;
+
+   for (i=n; i > 1; --i) {
+      int j = stb_randLCG() % i;
+      stb_swap(a, (char *) p + j * sz, sz);
+      a -= sz;
+   }
+   if (seed)
+      stb_srandLCG(old_seed);
 }
 
-void stb_shuffle(void *p, size_t n, size_t sz, unsigned long seed) {
-    char *a;
-    unsigned long old_seed;
-    int i;
-    if (seed) {
-        old_seed = stb_srandLCG(seed);
-    }
-    a = (char *) p + (n-1) * sz;
-
-    for (i=n; i > 1; --i) {
-        int j = stb_randLCG() % i;
-        stb_swap(a, (char *) p + j * sz, sz);
-        a -= sz;
-    }
-    if (seed) {
-        stb_srandLCG(old_seed);
-    }
+void stb_reverse(void *p, size_t n, size_t sz)
+{
+   int i,j = n-1;
+   for (i=0; i < j; ++i,--j) {
+      stb_swap((char *) p + i * sz, (char *) p + j * sz, sz);
+   }
 }
 
-void stb_reverse(void *p, size_t n, size_t sz) {
-    int i,j = n-1;
-    for (i=0; i < j; ++i,--j) {
-        stb_swap((char *) p + i * sz, (char *) p + j * sz, sz);
-    }
-}
-
-// NOTE(stb): public domain Mersenne Twister by Michael Brundage
+// public domain Mersenne Twister by Michael Brundage
 #define STB__MT_LEN       624
 
 int stb__mt_index = STB__MT_LEN*sizeof(unsigned long)+1;
@@ -200,15 +230,16 @@ unsigned long stb__mt_buffer[STB__MT_LEN];
 
 int srandcalled = 0;
 
-void stb_srand(unsigned long seed) {
-    srandcalled = 1;
+void stb_srand(unsigned long seed)
+{
+   srandcalled = 1;
 
-    int i;
-    unsigned long old = stb_srandLCG(seed);
-    for (i = 0; i < STB__MT_LEN; i++)
-        stb__mt_buffer[i] = stb_randLCG();
-    stb_srandLCG(old);
-    stb__mt_index = STB__MT_LEN*sizeof(unsigned long);
+   int i;
+   unsigned long old = stb_srandLCG(seed);
+   for (i = 0; i < STB__MT_LEN; i++)
+      stb__mt_buffer[i] = stb_randLCG();
+   stb_srandLCG(old);
+   stb__mt_index = STB__MT_LEN*sizeof(unsigned long);
 }
 
 #define STB__MT_IA           397
@@ -219,50 +250,49 @@ void stb_srand(unsigned long seed) {
 #define STB__TWIST(b,i,j)    ((b)[i] & STB__UPPER_MASK) | ((b)[j] & STB__LOWER_MASK)
 #define STB__MAGIC(s)        (((s)&1)*STB__MATRIX_A)
 
-unsigned long stb_rand() {
-    if(!srandcalled) {
-        stb_srand(time(NULL));
-    }
+unsigned long stb_rand()
+{
+   if(!srandcalled) stb_srand(time(NULL));
 
-    unsigned long * b = stb__mt_buffer;
-    int idx = stb__mt_index;
-    unsigned long s,r;
-    int i;
-
-    if (idx >= STB__MT_LEN*sizeof(unsigned long)) {
-        if (idx > STB__MT_LEN*sizeof(unsigned long)) {
-            stb_srand(0);
-        }
-        idx = 0;
-        i = 0;
-        for (; i < STB__MT_IB; i++) {
-            s = STB__TWIST(b, i, i+1);
-            b[i] = b[i + STB__MT_IA] ^ (s >> 1) ^ STB__MAGIC(s);
-        }
-        for (; i < STB__MT_LEN-1; i++) {
-            s = STB__TWIST(b, i, i+1);
-            b[i] = b[i - STB__MT_IB] ^ (s >> 1) ^ STB__MAGIC(s);
-        }
-
-        s = STB__TWIST(b, STB__MT_LEN-1, 0);
-        b[STB__MT_LEN-1] = b[STB__MT_IA-1] ^ (s >> 1) ^ STB__MAGIC(s);
-    }
-    stb__mt_index = idx + sizeof(unsigned long);
-
-    r = *(unsigned long *)((unsigned char *)b + idx);
-
-    r ^= (r >> 11);
-    r ^= (r << 7) & 0x9D2C5680;
-    r ^= (r << 15) & 0xEFC60000;
-    r ^= (r >> 18);
-
-    return r;
+   unsigned long * b = stb__mt_buffer;
+   int idx = stb__mt_index;
+   unsigned long s,r;
+   int i;
+	
+   if (idx >= STB__MT_LEN*sizeof(unsigned long)) {
+      if (idx > STB__MT_LEN*sizeof(unsigned long))
+         stb_srand(0);
+      idx = 0;
+      i = 0;
+      for (; i < STB__MT_IB; i++) {
+         s = STB__TWIST(b, i, i+1);
+         b[i] = b[i + STB__MT_IA] ^ (s >> 1) ^ STB__MAGIC(s);
+      }
+      for (; i < STB__MT_LEN-1; i++) {
+         s = STB__TWIST(b, i, i+1);
+         b[i] = b[i - STB__MT_IB] ^ (s >> 1) ^ STB__MAGIC(s);
+      }
+      
+      s = STB__TWIST(b, STB__MT_LEN-1, 0);
+      b[STB__MT_LEN-1] = b[STB__MT_IA-1] ^ (s >> 1) ^ STB__MAGIC(s);
+   }
+   stb__mt_index = idx + sizeof(unsigned long);
+   
+   r = *(unsigned long *)((unsigned char *)b + idx);
+   
+   r ^= (r >> 11);
+   r ^= (r << 7) & 0x9D2C5680;
+   r ^= (r << 15) & 0xEFC60000;
+   r ^= (r >> 18);
+   
+   return r;
 }
 
-double stb_frand(void) {
-    return stb_rand() / ((double) (1 << 16) * (1 << 16));
+double stb_frand(void)
+{
+   return (double) stb_rand() / ((double) ULONG_MAX);
+   //return (double) stb_rand() / ((double) (1 << 16) * (1 << 16)); // NOTE: This stopped working?
 }
-
 #endif
 // 002. END
 
@@ -322,9 +352,6 @@ int mth_pow(int num, int pow) {
 
 // 004. START
 #if 1
-
-//#include <stdlib.h>
-
 int str_len(char *str) {
      char* ptr = str;
      while(*ptr != '\0')
@@ -339,24 +366,25 @@ int str_equal(char *a, char *b) {
   return ((*a == '\0') && (*b == '\0'));
 }
 
+// No overloading in C...
 void str_copy(char *s, char *copy) {
-    while(*s != '\0') {
-         *copy = *s;
-         s++, copy++;
-    }
-    *copy = '\0';
+     while(*s != '\0') {
+          *copy = *s;
+          s++, copy++;
+     }
+     *copy = '\0';
 }
 
-char* str_copy(char *s) {
-  char* copy = (char*)alloc(sizeof(char)*(str_len(s)+1));
-  char* copyPtr = copy;
-  while(*s != '\0') {
-    *copyPtr = *s;
-    s++, copyPtr++;
-  }
-  *copyPtr = '\0';
-  return copy;
-}
+//char* str_copy(char *s) {
+//  char* copy = (char*)alloc(sizeof(char)*(str_len(s)+1));
+//  char* copyPtr = copy;
+//  while(*s != '\0') {
+//    *copyPtr = *s;
+//    s++, copyPtr++;
+//  }
+//  *copyPtr = '\0';
+//  return copy;
+//}
 
 int str_beginswith(char* str, char* start) {
   while((*start != '\0') && (*start == *str)) {
@@ -497,19 +525,17 @@ int str_toint(char *str) {
    int length = str_len(str);
 
    while (length > 0) {
+      assert((*strPtr >= '0' && *strPtr <= '9') || (length == str_len(str) && *strPtr == '-'));
       length--;
-      if (*strPtr < '0' || *strPtr > '9') {
-         strPtr++;
-         continue;
-      } else {
-         // Calculate value based on position (i.e. value * 10^position)
-         int exponent = 1;
-         for (int i = 0; i < length; i++) {
-            exponent *= 10;
-         }
-         result += (*strPtr - 48) * exponent;
-         strPtr++;
+      if(*strPtr == '-') { strPtr++; continue; }
+
+      // Calculate value based on position (i.e. value * 10^position)
+      int exponent = 1;
+      for (int i = 0; i < length; i++) {
+         exponent *= 10;
       }
+      result += (*strPtr - 48) * exponent;
+      strPtr++;
    }
    if (str[0] == '-') { result = -result; }
    return result;
@@ -552,6 +578,49 @@ char* str_inttostr(int num) {
    *resPtr = '\0';
    return res;
 }
-
 #endif
 // 004. END
+
+#if 1
+// 005. START
+#define offsetof(st, m) ((size_t)&(((st *)0)->m))
+#define MAX(x, y) ((x) >= (y) ? (x) : (y))
+#define CLAMP_MIN(x, min) MAX(x, min)
+
+typedef struct ArrHdr {
+    size_t len;
+    size_t cap;
+    char buf[];
+} ArrHdr;
+
+#define arr__hdr(b) ((ArrHdr *)((char *)(b) - offsetof(ArrHdr, buf)))
+
+#define arr_len(b) ((b) ? arr__hdr(b)->len : 0)
+#define arr_cap(b) ((b) ? arr__hdr(b)->cap : 0)
+#define arr_end(b) ((b) + arr_len(b))
+#define arr_sizeof(b) ((b) ? arr_len(b)*sizeof(*b) : 0)
+
+#define arr_free(b) ((b) ? (free(arr__hdr(b)), (b) = NULL) : 0)
+#define arr_fit(b, n) ((n) <= arr_cap(b) ? 0 : ((b) = arr__grow((b), (n), sizeof(*(b)))))
+#define arr_push(b, ...) (arr_fit((b), 1 + arr_len(b)), (b)[arr__hdr(b)->len++] = (__VA_ARGS__))
+#define arr_clear(b) ((b) ? arr__hdr(b)->len = 0 : 0)
+
+void *arr__grow(const void *buf, size_t new_len, size_t elem_size) {
+    assert(arr_cap(buf) <= (SIZE_MAX - 1)/2);
+    size_t new_cap = CLAMP_MIN(2*arr_cap(buf), MAX(new_len, 16));
+    assert(new_len <= new_cap);
+    assert(new_cap <= (SIZE_MAX - offsetof(ArrHdr, buf))/elem_size);
+    size_t new_size = offsetof(ArrHdr, buf) + new_cap*elem_size;
+    ArrHdr *new_hdr;
+    if (buf) {
+        new_hdr = xrealloc(arr__hdr(buf), new_size);
+    } else {
+        new_hdr = xmalloc(new_size);
+        new_hdr->len = 0;
+    }
+    new_hdr->cap = new_cap;
+    return new_hdr->buf;
+}
+
+// 005. END
+#endif
