@@ -2,8 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct pipe {
+   char* name;
+   int weight;
+   char** children;
+} pipe;
+
 int main() {
-   FILE *fp = fopen("input", "r");
+   FILE* fp = fopen("input", "r");
 
    fseek(fp, 0, SEEK_END);
    long fsize = ftell(fp);
@@ -14,40 +20,38 @@ int main() {
    fclose(fp);
 
    int numPipes;
-   char **pipes = str_split(buffer, '\n', &numPipes);
-   numPipes--; // Because the last split is a blank line
+   char** pipesData = str_split(buffer, '\n', &numPipes);
+   numPipes--; // Because the last array element is a blank line
 
-   char pipeNames[numPipes][16];
-   int pipeWeights[numPipes];
-   int pipeChldNum[numPipes];
-   char** pipeChildren[numPipes]; // I'm assuming this memory is initialised to zero
+   pipe* pipes = NULL;
 
    for(int i = 0; i < numPipes; i++) {
+      pipe* p = alloc(sizeof(pipe));
+
       int numDetails; 
-      char** pipeDetails = str_split(pipes[i], ' ', &numDetails);
-      for(int j = 0; j < str_len(pipeDetails[0])+1; j++) {
-         pipeNames[i][j] = pipeDetails[0][j];
-      }        
+      char** pipeDetails = str_split(pipesData[i], ' ', &numDetails);
 
-      pipeDetails[1] = str_lstrip(pipeDetails[1], '(');
-      str_rstrip(pipeDetails[1], ')');
-      pipeWeights[i] = str_toint(pipeDetails[1]);
+      p->name = str_copy(pipeDetails[0]);
 
-      if(numDetails == 2) { pipeChldNum[i] = 0; }
-      else { pipeChldNum[i] = numDetails - 3; }
+      char* weightStr = str_lstrip(pipeDetails[1], '(');
+      str_rstrip(weightStr, ')');
+      p->weight = str_toint(weightStr);
 
-      for(int j = 0; j < pipeChldNum[i]; j++) {
-         arr_push(pipeChildren[i], str_rstrip(pipeDetails[3 + j], ','));
+      int numChildren = (numDetails == 2) ? 0 : numDetails - 3;
+      for(int j = 0; j < numChildren; j++) {
+         arr_push(p->children, str_rstrip(pipeDetails[3 + j], ','));
       }
+
+      arr_push(pipes, *p);
    }
 
    int index = -1;
    int newIndex = 0;
    while(index != newIndex) {
       index = newIndex;
-      for(int i = 0; i < numPipes; i++) {
-         for(int j = 0; j < arr_len(pipeChildren[i]); j++) {
-            if(str_equal(pipeNames[index], pipeChildren[i][j])) {
+      for(int i = 0; i < arr_len(pipes); i++) {
+         for(int j = 0; j < arr_len(pipes[i].children); j++) {
+            if(str_equal(pipes[index].name, pipes[i].children[j])) {
                newIndex = i;
                goto end;
             }
@@ -56,5 +60,5 @@ int main() {
       end: ;
    }
 
-   log_info("Solution Part One: %s", pipeNames[index]);
+   log_info("Solution Part One: %s", pipes[index].name);
 }

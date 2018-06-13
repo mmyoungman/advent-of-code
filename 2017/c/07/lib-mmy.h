@@ -367,24 +367,24 @@ int str_equal(char *a, char *b) {
 }
 
 // No overloading in C...
-void str_copy(char *s, char *copy) {
-     while(*s != '\0') {
-          *copy = *s;
-          s++, copy++;
-     }
-     *copy = '\0';
-}
-
-//char* str_copy(char *s) {
-//  char* copy = (char*)alloc(sizeof(char)*(str_len(s)+1));
-//  char* copyPtr = copy;
-//  while(*s != '\0') {
-//    *copyPtr = *s;
-//    s++, copyPtr++;
-//  }
-//  *copyPtr = '\0';
-//  return copy;
+//void str_copy(char *s, char *copy) {
+//     while(*s != '\0') {
+//          *copy = *s;
+//          s++, copy++;
+//     }
+//     *copy = '\0';
 //}
+
+char* str_copy(char *s) {
+  char* copy = (char*)alloc(sizeof(char)*(str_len(s)+1));
+  char* copyPtr = copy;
+  while(*s != '\0') {
+    *copyPtr = *s;
+    s++, copyPtr++;
+  }
+  *copyPtr = '\0';
+  return copy;
+}
 
 int str_beginswith(char* str, char* start) {
   while((*start != '\0') && (*start == *str)) {
