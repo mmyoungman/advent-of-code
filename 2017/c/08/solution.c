@@ -19,6 +19,16 @@ int evaluate(HashTable *ht, char* key, char* comparitor, char* strValue) {
     }
 }
 
+int getMax(HashTable *ht) {
+    int maxValue = 0;
+    for(int i = 0; i < ht->cap; i++) {
+        if(ht->keys[i] && *(int*)(ht->values[i]) > maxValue) {
+            maxValue = *(int*)(ht->values[i]);
+        }
+    }
+    return maxValue;
+}
+
 int main() {
     FILE* fp = fopen("input", "r");
 
@@ -36,32 +46,36 @@ int main() {
 
     HashTable *ht = ht_create();
 
+    int overallMax = 0;
+
     for(int i = 0; i < numLines; i++) {
         int lineSize;
         char** line = str_split(data[i], ' ', &lineSize);
 
-        dbg("line[0]: %s, line[4]: %s", line[0], line[4]);
         if(!ht_search(ht, line[0])) {
             int *newValue = xmalloc(sizeof(int));
             *newValue = 0;
             ht_insert(ht, line[0], newValue);
-            dbg("init %s to %d", line[0], *(int*)ht_search(ht, line[0]));
         }
         if(!ht_search(ht, line[4])) {
             int *newValue = xmalloc(sizeof(int));
             *newValue = 0;
             ht_insert(ht, line[4], newValue);
-            dbg("init %s to %d", line[4], *(int*)ht_search(ht, line[4]));
         }
 
         if(evaluate(ht, line[4], line[5], line[6])) {
-            int *value = ht_search(ht, line[0]);
+            int *value = xmalloc(sizeof(int));
+            *value = *(int*)ht_search(ht, line[0]);
             if(str_equal(line[1], "inc")) {
                 *value += str_toint(line[2]);
             } else if(str_equal(line[1], "dec")) {
                 *value -= str_toint(line[2]);
             }
             ht_insert(ht, line[0], value);
+        }
+
+        if(getMax(ht) > overallMax) {
+            overallMax = getMax(ht);
         }
     }
 
@@ -74,5 +88,5 @@ int main() {
         }
     }
     dbg("Solution 8a, Name: %s, Value: %d", maxName, maxValue);
-
+    dbg("Solution 8b, Value: %d", overallMax);
 }
