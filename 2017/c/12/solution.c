@@ -1,11 +1,24 @@
 #include "lib-mmy.h"
 
+typedef struct Pipe {
+    int this;
+    int *conn;
+} Pipe;
+
 int arr_contains(int *arr, int arrLen, int x) {
     for(int i = 0; i < arrLen; i++) {
-        if(arr[i] == x)
-            return 1;
+        if(arr[i] == x) { return x; }
     }
-    return 0;
+    return -1;
+}
+
+int pipeInGroups(int p, int **groups, int numGroups) {
+    for(int i = 0; i < numGroups; i++) {
+        for(int j = 0; j < arr_len(groups[i]); j++) {
+            if(p == groups[i][j]) { return p; }
+        }
+    }
+    return -1;
 }
 
 int main() {
@@ -23,11 +36,6 @@ int main() {
     char** data = str_split(buffer, '\n', &size);
     size--;
 
-    typedef struct Pipe {
-        int this;
-        int *conn;
-    } Pipe;
-
     Pipe *pipes = 0;
     for(int i = 0; i < size; i++) {
         int lineSize;
@@ -41,27 +49,27 @@ int main() {
         arr_push(pipes, p);
     }
 
+    int **groups = 0;
+    int *group;
+
     for(int i = 0; i < arr_len(pipes); i++) {
-        //dbg("pipes[%d]: %d ->", i, pipes[i].this);
-        for(int j = 0; j < arr_len(pipes[i].conn); j++) {
-            //dbg("%d", pipes[i].conn[j]);
-        }
-    }
-
-    int oldLen = 1;
-    int newLen = 0;
-    int *zeroGroup = 0;
-    arr_push(zeroGroup, 0);
-
-    for(int i = 0; i < arr_len(zeroGroup); i++) {
-        for(int j = 0; j < arr_len(pipes); j++) {
-            if(pipes[j].this == zeroGroup[i]) {
-                for(int k = 0; k < arr_len(pipes[j].conn); k++) {
-                    if(!arr_contains(zeroGroup, arr_len(zeroGroup), pipes[j].conn[k]))
-                        arr_push(zeroGroup, pipes[j].conn[k]);
+        int p = pipeInGroups(pipes[i].this, groups, arr_len(groups));
+        if(-1 == p) {
+            group = 0;
+            arr_push(group, pipes[i].this);
+            for(int i = 0; i < arr_len(group); i++) {
+                for(int j = 0; j < arr_len(pipes); j++) {
+                    if(pipes[j].this == group[i]) {
+                        for(int k = 0; k < arr_len(pipes[j].conn); k++) {
+                            if(-1 == arr_contains(group, arr_len(group), pipes[j].conn[k]))
+                                arr_push(group, pipes[j].conn[k]);
+                        }
+                    }
                 }
             }
+            arr_push(groups, group);
         }
     }
-    dbg("Solution 12a: %d", arr_len(zeroGroup));
+    dbg("Solution 12a: %d", arr_len(groups[0]));
+    dbg("Solution 12b: %d", arr_len(groups));
 }
