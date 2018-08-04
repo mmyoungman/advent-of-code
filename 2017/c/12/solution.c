@@ -7,18 +7,18 @@ typedef struct Pipe {
 
 int arr_contains(int *arr, int arrLen, int x) {
     for(int i = 0; i < arrLen; i++) {
-        if(arr[i] == x) { return x; }
+        if(arr[i] == x) { return 1; }
     }
-    return -1;
+    return 0;
 }
 
 int pipeInGroups(int p, int **groups, int numGroups) {
     for(int i = 0; i < numGroups; i++) {
         for(int j = 0; j < arr_len(groups[i]); j++) {
-            if(p == groups[i][j]) { return p; }
+            if(p == groups[i][j]) { return 1; }
         }
     }
-    return -1;
+    return 0;
 }
 
 int main() {
@@ -53,15 +53,17 @@ int main() {
     int *group;
 
     for(int i = 0; i < arr_len(pipes); i++) {
-        int p = pipeInGroups(pipes[i].this, groups, arr_len(groups));
-        if(-1 == p) {
+        // if pipe isn't in any group
+        if(!pipeInGroups(pipes[i].this, groups, arr_len(groups))) {
+            // create a new group
             group = 0;
             arr_push(group, pipes[i].this);
+            // and add all connecting pipes to that group
             for(int i = 0; i < arr_len(group); i++) {
                 for(int j = 0; j < arr_len(pipes); j++) {
                     if(pipes[j].this == group[i]) {
                         for(int k = 0; k < arr_len(pipes[j].conn); k++) {
-                            if(-1 == arr_contains(group, arr_len(group), pipes[j].conn[k]))
+                            if(!arr_contains(group, arr_len(group), pipes[j].conn[k]))
                                 arr_push(group, pipes[j].conn[k]);
                         }
                     }
