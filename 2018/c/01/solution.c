@@ -15,36 +15,38 @@ int main() {
   char** data = str_split(buffer, '\n', &size);
   size--;
 
-  int freq = 0;
+  int *input_arr = 0;
+
   for(int i = 0; i < size; i++) {
-    if(data[i][0] == '+') {
-      freq += str_toint(str_lstrip(data[i], '+'));
-    } else { // it is '-'
-      freq += str_toint(data[i]);
-    }
+    arr_push(input_arr, str_toint(data[i]));
+  }
+
+  int freq = 0;
+  for(int i = 0; i < arr_len(input_arr); i++) {
+    freq += input_arr[i];
   }
 
   dbg("Solution 2018 01a: %d", freq);
 
   freq = 0;
-  int *freq_arr = 0;
+  HashTable *t = ht_create();
+  int *value = xmalloc(sizeof(int));
+  *value = 1;
 
   while(1) {
-    for(int i = 0; i < size; i++) {
-      arr_push(freq_arr, freq);
+    for(int i = 0; i < arr_len(input_arr); i++) {
+      char *freqStr = str_inttostr(freq);
+      ht_insert(t, freqStr, value);
+      free(freqStr);
 
-      if(data[i][0] == '+') {
-        freq += str_toint(str_lstrip(data[i], '+'));
-      } else { // it is '-'
-        freq += str_toint(data[i]);
-      }
+      freq += input_arr[i];
 
-      for(int j = 0; j < arr_len(freq_arr); j++) {
-        if(freq_arr[j] == freq) {
-          dbg("Solution 2018 01b: %d", freq);
-          return 0; 
-        }
+      freqStr = str_inttostr(freq);
+      if(ht_search(t, freqStr)) {
+        dbg("Solution 2018 01b: %d", freq);
+        return 0;
       }
+      free(freqStr);
     }
   }
 }
