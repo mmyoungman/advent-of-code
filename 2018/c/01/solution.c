@@ -26,7 +26,7 @@ int main() {
     freq += input_arr[i];
   }
 
-  dbg("Solution 2018 01a: %d", freq);
+  log_info("Solution 2018 01a: %d", freq);
 
   freq = 0;
   HashTable *t = ht_create();
@@ -43,7 +43,7 @@ int main() {
 
       freqStr = str_inttostr(freq);
       if(ht_search(t, freqStr)) {
-        dbg("Solution 2018 01b: %d", freq);
+        log_info("Solution 2018 01b: %d", freq);
         return 0;
       }
       free(freqStr);
