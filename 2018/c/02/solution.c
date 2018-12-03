@@ -15,14 +15,14 @@ int main() {
   fread(buffer, fsize, 1, fp);
   fclose(fp);
 
-  int data_size;
-  char** data = str_split(buffer, '\n', &data_size);
-  data_size--;
+  int dataSize;
+  char** data = str_split(buffer, '\n', &dataSize);
+  dataSize--;
 
   int twos = 0;
   int threes = 0;
 
-  for(int i = 0; i < data_size; i++) {
+  for(int i = 0; i < dataSize; i++) {
     HashTable *t = ht_create();
 
     for(int j = 0; j < str_len(data[i]); j++) {
@@ -44,12 +44,11 @@ int main() {
     for(int j = 'a'; j <= 'z'; j++) {
       char *charStr = str_copy_char(j);
       int *value = ht_search(t, charStr);
-      free(charStr);
-
       if(value) {
         if(*value == 2) { isTwo++; }
         if(*value == 3) { isThree++; }
       }
+      free(charStr);
     }
 
     if(isTwo) { twos++; }
@@ -58,10 +57,10 @@ int main() {
     ht_free(t);
   }
   
-  log_info("Solution 2018 02a: %d * %d = %d", twos, threes, twos * threes);
+  log_info("Solution 2018 02a: %d", twos * threes);
 
-  for(int i = 0; i < data_size; i++) {
-    for(int j = i; j < data_size; j++) {
+  for(int i = 0; i < dataSize; i++) {
+    for(int j = i; j < dataSize; j++) {
       if(i == j) continue;
       int numDiffs = 0;
       int charDiffPlace = 0;
@@ -72,7 +71,7 @@ int main() {
         } 
       }
       if(numDiffs == 1) {
-        log_info("Solution 2018 02b: %s and %s differ by one character at index %d, so the result is...", data[i], data[j], charDiffPlace);
+        log_info("Solution 2018 02b:");
         for(int k = 0; k < str_len(data[i]); k++) {
           if(k == charDiffPlace) continue;
           printf("%c", data[i][k]);
