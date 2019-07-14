@@ -21,10 +21,7 @@ for item in list:
    else:
       direction -= 1
    
-   if direction == -1:
-      direction = 3
-   if direction == 4:
-      direction = 0
+   direction = direction % 4
    
    item = int(item[1:])
 
